@@ -62,7 +62,7 @@ if is_deepspeed_available():
     import deepspeed
 
 
-class DPOTrainer(Trainer):
+class IPOTrainer(Trainer):
     r"""
     Initialize DPOTrainer.
 
@@ -175,6 +175,9 @@ class DPOTrainer(Trainer):
         model_adapter_name: Optional[str] = None,
         ref_adapter_name: Optional[str] = None,
         reference_free: bool = False,
+        bt_beta: float = 0.3,
+        simpo_margin: float = 0.5,
+        dynamic_dpo_alpha: bool = False,
     ):
         if model_init_kwargs is None:
             model_init_kwargs = {}
@@ -284,6 +287,8 @@ class DPOTrainer(Trainer):
         self.model_adapter_name = model_adapter_name
         self.ref_adapter_name = ref_adapter_name
         self.reference_free = reference_free
+        self.simpo_margin = simpo_margin
+        self.dynamic_dpo_alpha = dynamic_dpo_alpha
 
         if ref_model:
             self.ref_model = ref_model
@@ -291,7 +296,9 @@ class DPOTrainer(Trainer):
             # The `model` with adapters turned off will be used as the reference model
             self.ref_model = None
         else:
-            self.ref_model = create_reference_model(model)
+            # self.ref_model = create_reference_model(model)
+            # XXX no refer_model
+            self.ref_model = None
 
         if tokenizer is None:
             raise ValueError("tokenizer must be specified to tokenize a DPO dataset.")
@@ -368,6 +375,7 @@ class DPOTrainer(Trainer):
         self.gamma = gamma
         self.label_smoothing = label_smoothing
         self.loss_type = loss_type
+        self.bt_beta = bt_beta
 
         self._stored_metrics = defaultdict(lambda: defaultdict(list))
 
@@ -408,15 +416,18 @@ class DPOTrainer(Trainer):
                 )
 
         if self.ref_model is None:
-            if not (self.is_peft_model or self.precompute_ref_log_probs):
-                raise ValueError(
-                    "No reference model and model is not a Peft model. Try setting `precompute_ref_log_probs=True`"
-                )
+            pass
+            # if not (self.is_peft_model or self.precompute_ref_log_probs):
+            #     raise ValueError(
+            #         "No reference model and model is not a Peft model. Try setting `precompute_ref_log_probs=True`"
+            #     )
         else:
             if self.is_deepspeed_enabled:
-                self.ref_model = self._prepare_deepspeed(self.ref_model)
+                # self.ref_model = self._prepare_deepspeed(self.ref_model)
+                self.ref_model = None
             else:
-                self.ref_model = self.accelerator.prepare_model(self.ref_model, evaluation_mode=True)
+                # self.ref_model = self.accelerator.prepare_model(self.ref_model, evaluation_mode=True)
+                self.ref_model = None
 
     def _prepare_deepspeed(self, model: PreTrainedModelWrapper):
         # Adapted from accelerate: https://github.com/huggingface/accelerate/blob/739b135f8367becb67ffaada12fe76e3aa60fefd/src/accelerate/accelerator.py#L1473
@@ -902,6 +913,18 @@ class DPOTrainer(Trainer):
                 ),
                 0,
             )
+        elif self.loss_type == "simpo":
+            constant_gamma = torch.tensor(self.simpo_margin).to(pi_logratios.device)
+            logits = pi_logratios
+            losses = -F.logsigmoid(self.beta * logits - constant_gamma)
+            # NOTE support label smoothing
+            if self.label_smoothing > 0:
+                # Introduce dynamic here, XXX default 0.5 (remenber)
+                dynamic_weight = self.label_smoothing * torch.where(pi_logratios < 0., torch.tensor(1), torch.tensor(0)) if self.label_smoothing > 0 else 0.0
+                losses = -F.logsigmoid(self.beta * logits - constant_gamma) * (1 - dynamic_weight) - F.logsigmoid(-self.beta * logits - constant_gamma) * dynamic_weight
+            
+            reference_chosen_logps = torch.tensor([0], dtype=pi_logratios.dtype, device=pi_logratios.device)
+            reference_rejected_logps = torch.tensor([0], dtype=pi_logratios.dtype, device=pi_logratios.device)
         else:
             raise ValueError(
                 f"Unknown loss type: {self.loss_type}. Should be one of ['sigmoid', 'hinge', 'ipo', 'kto_pair']"
@@ -988,7 +1011,15 @@ class DPOTrainer(Trainer):
             padding_value=self.padding_value,
             device=self.accelerator.device,
         )
+        tmp_dtype = torch.float16 if self.args.fp16 else torch.bfloat16
+        model = model.to(self.accelerator.device).to(tmp_dtype)
         len_chosen = batch["chosen_labels"].shape[0]
+        
+        new_batch = []
+        for item in concatenated_batch["concatenated_images"]:
+            new_batch.append(item.to(tmp_dtype))
+        concatenated_batch.pop("concatenated_images")
+        concatenated_batch["concatenated_images"] = torch.stack(new_batch, dim=0)
 
         all_logits, new_labels = model(
             concatenated_batch["concatenated_input_ids"],
@@ -1054,33 +1085,55 @@ class DPOTrainer(Trainer):
             reference_chosen_logps = batch["reference_chosen_logps"]
             reference_rejected_logps = batch["reference_rejected_logps"]
         else:
-            with torch.no_grad():
-                if self.ref_model is None:
-                    with self.null_ref_context():
+            if self.loss_type != "simpo":
+                with torch.no_grad():
+                    if self.ref_model is None:
+                        with self.null_ref_context():
+                            (
+                                reference_chosen_logps,
+                                reference_rejected_logps,
+                            ) = self.concatenated_forward(self.model, batch)[:2]
+                    else:
                         (
                             reference_chosen_logps,
                             reference_rejected_logps,
-                        ) = self.concatenated_forward(self.model, batch)[:2]
-                else:
-                    (
-                        reference_chosen_logps,
-                        reference_rejected_logps,
-                    ) = self.concatenated_forward(self.ref_model, batch)[:2]
+                        ) = self.concatenated_forward(self.ref_model, batch)[:2]
 
+        if self.dpo_alpha > 0:
+            if self.loss_type != "simpo":
+                reference_chosen_logps = reference_chosen_logps.to(policy_chosen_logps.dtype)
+                reference_rejected_logps = reference_rejected_logps.to(policy_chosen_logps.dtype)
+            else:
+                self.reference_free = True
+                reference_chosen_logps= torch.tensor([0.])
+                reference_rejected_logps = torch.tensor([0.])
         
-        unscaled_dpo_losses, chosen_rewards, rejected_rewards = self.dpo_loss(
-            policy_chosen_logps,
-            policy_rejected_logps,
-            reference_chosen_logps,
-            reference_rejected_logps,
-        )
-        unscaled_dpo_losses = unscaled_dpo_losses.mean()
-        dpo_losses = unscaled_dpo_losses * self.dpo_alpha
+            losses, chosen_rewards, rejected_rewards = self.dpo_loss(
+                policy_chosen_logps,
+                policy_rejected_logps,
+                reference_chosen_logps,
+                reference_rejected_logps,
+            )
+        
+            unscaled_dpo_losses = losses
+            
+            unscaled_dpo_losses = unscaled_dpo_losses.mean()
+            dpo_losses = unscaled_dpo_losses * self.dpo_alpha
+    
+        else:
+            dpo_losses = torch.tensor(0.)
+            unscaled_dpo_losses = torch.tensor(0.)
+            reward_accuracies = torch.tensor(0.)
+            chosen_rewards, rejected_rewards = torch.tensor(0.), torch.tensor(0.)
+        
         unscaled_sft_loss = self.get_sft_loss(policy_chosen_logits, chosen_labels) 
         sft_loss = unscaled_sft_loss * self.gamma
         
         # print(sft_loss.shape, dpo_losses.shape)
-        losses = dpo_losses + sft_loss
+        if self.gamma > 0:
+            losses = dpo_losses + sft_loss
+        else:
+            losses = dpo_losses
         # losses = sft_loss # sft only
         # losses = dpo_losses # dpo only
         reward_accuracies = (chosen_rewards > rejected_rewards).float()
@@ -1100,8 +1153,8 @@ class DPOTrainer(Trainer):
         reward_accuracies = all_gather_tensor(reward_accuracies)
         policy_chosen_logps = all_gather_tensor(policy_chosen_logps)
         policy_rejected_logps = all_gather_tensor(policy_rejected_logps)
-        reference_chosen_logps = all_gather_tensor(reference_chosen_logps)
-        reference_rejected_logps = all_gather_tensor(reference_rejected_logps)
+        # reference_chosen_logps = all_gather_tensor(reference_chosen_logps)
+        # reference_rejected_logps = all_gather_tensor(reference_rejected_logps)
 
 
         prefix = "eval_" if train_eval == "eval" else ""
@@ -1119,8 +1172,8 @@ class DPOTrainer(Trainer):
         # metrics[f"{prefix}logits/rejected"] =policy_rejected_logits
         # metrics[f"{prefix}logits/chosen"] = policy_chosen_logits
         # reference logps
-        metrics[f"{prefix}ref_logps/rejected"] = reference_rejected_logps.mean().cpu()
-        metrics[f"{prefix}ref_logps/chosen"] = reference_chosen_logps.mean().cpu()
+        # metrics[f"{prefix}ref_logps/rejected"] = reference_rejected_logps.mean().cpu()
+        # metrics[f"{prefix}ref_logps/chosen"] = reference_chosen_logps.mean().cpu()
 
         # metrics all pick .4 digits
         # for k in metrics:
