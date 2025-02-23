@@ -105,6 +105,8 @@ class ModelInference:
             modal_tensor = torch.zeros(3, 224, 224).half().to('cuda') # placeholder, not processed anyway, no special token in prompt
         else:
             raise ValueError(f"modal_type {modal_type} not supported")
+        
+        print(f"modal_tensor: {modal_tensor.shape}")
 
         # print(video_tensor.shape)
         input_ids = tokenizer_X_token(prompt, tokenizer, X_TOKEN_INDEX[modal_type], return_tensors='pt').unsqueeze(0).to('cuda')

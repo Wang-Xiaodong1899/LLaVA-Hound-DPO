@@ -45,3 +45,4 @@ output
 cc3m
 checkpoints
 ckpts*
+*.jsonl

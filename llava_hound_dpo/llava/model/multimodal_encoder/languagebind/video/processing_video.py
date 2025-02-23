@@ -15,6 +15,25 @@ from torchvision.transforms import Compose, Lambda, ToTensor
 from torchvision.transforms._transforms_video import NormalizeVideo, RandomCropVideo, RandomHorizontalFlipVideo, CenterCropVideo
 from pytorchvideo.transforms import ApplyTransformToKey, ShortSideScale, UniformTemporalSubsample
 
+def augmentation(frame, transform, state):
+    torch.set_rng_state(state)
+    return transform(frame)
+
+import random
+from PIL import ImageFilter
+class GaussianBlur(object):
+    """Gaussian blur augmentation from SimCLR: https://arxiv.org/abs/2002.05709"""
+
+    def __init__(self, sigma=[.1, 2.]):
+        self.sigma = sigma
+
+    def __call__(self, x):
+        sigma = random.uniform(self.sigma[0], self.sigma[1])
+        x = x.filter(ImageFilter.GaussianBlur(radius=sigma))
+        return x
+
+
+
 
 OPENAI_DATASET_MEAN = (0.48145466, 0.4578275, 0.40821073)
 OPENAI_DATASET_STD = (0.26862954, 0.26130258, 0.27577711)
@@ -110,7 +129,7 @@ def get_video_transform(video_decode_backend, num_frames=8):
                 # RandomHorizontalFlipVideo(p=0.5),
             ]
         )
-    elif video_decode_backend == 'frames':
+    elif video_decode_backend == 'frames': # XXX here to pass video frames files
         transform = Compose(
             [
                 NormalizeVideo(mean=OPENAI_DATASET_MEAN, std=OPENAI_DATASET_STD),
@@ -119,6 +138,24 @@ def get_video_transform(video_decode_backend, num_frames=8):
                 # RandomHorizontalFlipVideo(p=0.5),
             ]
         )
+        
+        # # TODO if using augmentation
+        # print("--------NOTE: using augmentation!---------------------------------------")
+        # transform = transforms.Compose([
+        #     transforms.RandomResizedCrop(224, scale=(0.08, 0.3)),
+        #     transforms.RandomApply([
+        #         transforms.ColorJitter(0.4, 0.4, 0.2, 0.1)  # not strengthened
+        #     ], p=0.8),
+        #     transforms.RandomGrayscale(p=0.2),
+        #     transforms.RandomApply([GaussianBlur([.1, 2.])], p=1.0),
+        #     transforms.RandomHorizontalFlip(),
+        #     transforms.ToTensor(),
+        #     transforms.Normalize(mean=OPENAI_DATASET_MEAN, std=OPENAI_DATASET_STD),
+        # ])
+        
+        
+        
+        
     else:
         raise NameError('video_decode_backend should specify in (pytorchvideo, decord, opencv)')
     return transform
@@ -163,11 +200,27 @@ def load_and_transform_video(
     #     video_outputs = transform(video_data)
     
     elif video_decode_backend == 'frames':
-        frames = load_frames(video_path)
+        frames = load_frames(video_path) # many frames
+        # import pdb; pdb.set_trace()
+        # HACK drop images to 2
+        # n = len(frames)
+        # indices = np.linspace(0, n - 1, num=2, dtype=int)
+        # sampleframes = [frames[i] for i in indices]
+        # frames = sampleframes
+        
         frames = sample_frames(frames, num_frames)
+        # HACK
+        # print(len(frames))
+        # NOTE original
         to_tensor = ToTensor()
         video_data = torch.stack([to_tensor(_) for _ in frames]).permute(1, 0, 2, 3) # (T, C, H, W) -> (C, T, H, W)
         video_outputs = transform(video_data)
+        
+        # state = torch.get_rng_state()
+        # video_outputs = [augmentation(v, transform, state) for v in frames] # [(3, 224, 224)]
+        # video_outputs = torch.stack(video_outputs, dim=1)
+        # import pdb; pdb.set_trace()
+        
 
     elif video_decode_backend == 'opencv':
         cv2_vr = cv2.VideoCapture(video_path)
@@ -220,10 +273,12 @@ class LanguageBindVideoProcessor(ProcessorMixin):
             else:
                 video_decode_backend = self.config.vision_config.video_decode_backend
                 transform_function = self.transform
-            images = make_list_of_images(images)
+            images = make_list_of_images(images) # ['/home/user/wangxd/LLaVA-NeXT/data/shareVideoGPTV/dpo_train_data/--HUaAQKqgA']
+            
             image_features = [self.image_processor(image, transform_function,
                                                    video_decode_backend=video_decode_backend,
                                                    num_frames=self.config.vision_config.num_frames) for image in images]
+            # image_features[0]: (3, 8, 224, 224)
             # image_features = [torch.rand(3, 8, 224, 224) for image in images]
             image_features = torch.stack(image_features)
         if text is not None and images is not None:
