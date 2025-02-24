@@ -20,7 +20,7 @@ output_dir=/volsparse3/wxd/ckpt/${WANDB_PROJECT}/${WANDB_NAME}
 mkdir -p $output_dir
 
 # DATA original data
-data_path=/workspace/wxd/LLaVA-Hound-DPO/llava_hound_dpo/self-gen/LLaVA-Hound-SFT_debate_aug_temp_top_p1.0_temp1.2.jsonl
+data_path=/workspace/wxd/LLaVA-Hound-DPO/llava_hound_dpo/self-gen/LLaVA-Hound-SFT_debate_temp0_aug_17k_top_p1.0_temp1.2.jsonl
 
 video_dir=/data/llava_hound/shareVideoGPTV/dpo_train_data
 image_dir="/"
