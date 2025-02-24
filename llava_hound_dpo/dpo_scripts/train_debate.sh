@@ -51,7 +51,7 @@ torchrun --nproc_per_node=$n_gpu --master_port=$port dpo_scripts/run_dpo_avg.py 
     --group_by_modality_length False \
     --bf16 True \
     --output_dir $output_dir \
-    --num_train_epochs 3 \
+    --num_train_epochs 4 \
     --per_device_train_batch_size 2 \
     --per_device_eval_batch_size 1 \
     --gradient_accumulation_steps 2 \
