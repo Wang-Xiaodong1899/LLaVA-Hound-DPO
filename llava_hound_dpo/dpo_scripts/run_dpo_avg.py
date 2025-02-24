@@ -817,15 +817,19 @@ def train(attn_implementation):
         model.config.mm_use_x_patch_token = model_args.mm_use_x_patch_token
         model.initialize_X_tokenizer(model_args, tokenizer=tokenizer)
 
+    # TODO debug
     ###################
-    # for p in model.get_model().layers.parameters():
-    #     p.requires_grad = False
-    # for p in model.get_model().norm.parameters():
-    #     p.requires_grad = False
-    # for p in model.get_model().embed_tokens.parameters():
-    #     p.requires_grad = False
-    # for p in model.lm_head.parameters():
-    #     p.requires_grad = False
+    DEBUG = False
+    if DEBUG:
+        print("[INFO]----------------Model are Frozen----------------------Attention---------------")
+        for p in model.get_model().layers.parameters():
+            p.requires_grad = False
+        for p in model.get_model().norm.parameters():
+            p.requires_grad = False
+        for p in model.get_model().embed_tokens.parameters():
+            p.requires_grad = False
+        for p in model.lm_head.parameters():
+            p.requires_grad = False
     #################
 
     train_dataset = make_dpo_data_module(tokenizer=tokenizer,

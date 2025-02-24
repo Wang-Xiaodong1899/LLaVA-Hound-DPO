@@ -7,7 +7,7 @@ export cache_dir=$cache_dir
 
 # export WANDB_MODE=disabled
 export WANDB_PROJECT=llava-hound-sft
-export WANDB_NAME=LLaVA-Hound-SFT-SimPO
+export WANDB_NAME=LLaVA-Hound-SFT-debate-SimPO-17k_top_p1.0_temp1.2-ls0.1
 
 # gpu_ids=0
 gpu_ids=4,5,6,7
@@ -19,8 +19,8 @@ model_name_or_path=$input_model_name
 output_dir=/data2/wangxd/ckpt/${WANDB_PROJECT}/${WANDB_NAME}
 mkdir -p $output_dir
 
-# DATA original data
-data_path=/home/user/wangxd/LLaVA-NeXT/data/shareVideoGPTV/sft_dpo_17k.jsonl
+# DATA debate data
+data_path=/home/user/wangxd/LLaVA-Hound-DPO/llava_hound_dpo/self-gen/LLaVA-Hound-SFT_debate_aug_17k_top_p1.0_temp1.2.jsonl
 
 video_dir=/home/user/wangxd/LLaVA-NeXT/data/shareVideoGPTV/dpo_train_data
 image_dir="/"
@@ -34,7 +34,7 @@ torchrun --nproc_per_node=$n_gpu --master_port=$port dpo_scripts/run_dpo_avg.py 
     --deepspeed config/zero2.json \
     --model_name_or_path $model_name_or_path \
     --loss_type simpo \
-    --label_smoothing 0. \
+    --label_smoothing 0.1 \
     --dpo_alpha 1.0 --beta 2.0 --gamma 0.5 \
     --version v1 \
     --data_path $data_path \
@@ -52,9 +52,9 @@ torchrun --nproc_per_node=$n_gpu --master_port=$port dpo_scripts/run_dpo_avg.py 
     --bf16 True \
     --output_dir $output_dir \
     --num_train_epochs 3 \
-    --per_device_train_batch_size 1 \
+    --per_device_train_batch_size 2 \
     --per_device_eval_batch_size 1 \
-    --gradient_accumulation_steps 4 \
+    --gradient_accumulation_steps 2 \
     --evaluation_strategy "no" \
     --save_strategy "steps" \
     --save_steps 1000 \

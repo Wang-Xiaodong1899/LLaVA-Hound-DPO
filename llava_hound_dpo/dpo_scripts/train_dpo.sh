@@ -1,16 +1,18 @@
-input_model_name=${1:-"ShareGPTVideo/LLaVA-Hound-SFT"}
-output_model_name=${2:-"$SAVE_DIR/test/Video-LLaVA-DPO"}
+input_model_name=${1:-"/data2/wangxd/models/LLaVA-Hound-SFT"}
+output_model_name=${2:-"/data2/wangxd/ckpt/LLaVA-Hound-SFT-DPO-2"}
 lr=${3:-"5e-7"}
+
+CACHE_DIR=/data2/wangxd/.cache
 
 cache_dir=$CACHE_DIR
 export cache_dir=$cache_dir
 
 # export WANDB_MODE=disabled
-export WANDB_PROJECT=llava-hound
+export WANDB_PROJECT=llava-hound-sft
 export WANDB_NAME=dpo
 
 # gpu_ids=0
-gpu_ids=0,1,2,3,4,5,6,7
+gpu_ids=4,5,6,7
 export CUDA_VISIBLE_DEVICES=$gpu_ids
 n_gpu=$(echo $gpu_ids | tr "," "\n" | wc -l)
 echo "Using $n_gpu GPUs: $gpu_ids"
@@ -20,9 +22,9 @@ output_dir=$output_model_name
 mkdir -p $output_dir
 
 # DATA
-data_path=$DATA_DIR/video_instruction/train/dpo/sft_dpo_17k.jsonl
+data_path=/home/user/wangxd/LLaVA-NeXT/data/shareVideoGPTV/sft_dpo_17k.jsonl
 
-video_dir=$TRAIN_VIDEO_DIR
+video_dir=/home/user/wangxd/LLaVA-NeXT/data/shareVideoGPTV/dpo_train_data
 image_dir="/"
 
 # sudo chmod +x -R .
@@ -39,8 +41,8 @@ torchrun --nproc_per_node=$n_gpu --master_port=$port dpo_scripts/run_dpo.py \
     --video_folder $video_dir \
     --image_folder $image_dir \
     --X "Image" "Video" --training_modal 'video' \
-    --image_tower LanguageBind/LanguageBind_Image \
-    --video_tower LanguageBind/LanguageBind_Video_merge \
+    --image_tower /data2/wangxd/models/LanguageBind/LanguageBind_Image \
+    --video_tower /data2/wangxd/models/LanguageBind/LanguageBind_Video_merge \
     --mm_projector_type mlp2x_gelu \
     --mm_vision_select_layer -2 \
     --mm_use_x_start_end False \
@@ -50,12 +52,12 @@ torchrun --nproc_per_node=$n_gpu --master_port=$port dpo_scripts/run_dpo.py \
     --bf16 True \
     --output_dir $output_dir \
     --num_train_epochs 3 \
-    --per_device_train_batch_size 4 \
-    --per_device_eval_batch_size 4 \
+    --per_device_train_batch_size 1 \
+    --per_device_eval_batch_size 1 \
     --gradient_accumulation_steps 4 \
     --evaluation_strategy "no" \
     --save_strategy "steps" \
-    --save_steps 70 \
+    --save_steps 50 \
     --save_only_model True \
     --save_total_limit 11 \
     --learning_rate $lr --freeze_mm_mlp_adapter True \

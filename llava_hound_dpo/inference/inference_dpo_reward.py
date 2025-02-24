@@ -1,3 +1,7 @@
+import sys
+
+sys.path.append("/home/user/wangxd/LLaVA-Hound-DPO/llava_hound_dpo/")
+
 import socket
 import json
 from PIL import Image
@@ -226,6 +230,9 @@ def main(model_path, reference_model_path, data_path, video_dir, output_dir, out
     # chunk_data = chunk_data[:32]
 
     save_path = f"{output_dir}/{output_name}"
+    
+    os.system(f"mkdir -p {output_dir}")
+    
     if os.path.exists(save_path):
         ll = len(chunk_data)
         res = load_json_data(save_path)
@@ -265,3 +272,4 @@ def main(model_path, reference_model_path, data_path, video_dir, output_dir, out
 
 if __name__ == "__main__":
     fire.Fire(main)
+    # CUDA_VISIBLE_DEVICES=3 python inference_dpo_reward.py /data2/wangxd/models/LLaVA-Hound-SFT /data2/wangxd/models/LLaVA-Hound-SFT /home/user/wangxd/LLaVA-Hound-DPO/llava_hound_dpo/self-gen/LLaVA-Hound-SFT_debate_aug_temp_top_p1.0_temp1.2.jsonl /home/user/wangxd/LLaVA-NeXT/data/shareVideoGPTV/dpo_train_data debug logp_temp.jsonl 0 1

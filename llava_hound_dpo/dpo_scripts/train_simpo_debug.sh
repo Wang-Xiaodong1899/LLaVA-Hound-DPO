@@ -7,10 +7,10 @@ export cache_dir=$cache_dir
 
 # export WANDB_MODE=disabled
 export WANDB_PROJECT=llava-hound-sft
-export WANDB_NAME=LLaVA-Hound-SFT-SimPO
+export WANDB_NAME=LLaVA-Hound-SFT-SimPO-debug
 
 # gpu_ids=0
-gpu_ids=4,5,6,7
+gpu_ids=3
 export CUDA_VISIBLE_DEVICES=$gpu_ids
 n_gpu=$(echo $gpu_ids | tr "," "\n" | wc -l)
 echo "Using $n_gpu GPUs: $gpu_ids"
@@ -20,7 +20,7 @@ output_dir=/data2/wangxd/ckpt/${WANDB_PROJECT}/${WANDB_NAME}
 mkdir -p $output_dir
 
 # DATA original data
-data_path=/home/user/wangxd/LLaVA-NeXT/data/shareVideoGPTV/sft_dpo_17k.jsonl
+data_path=/home/user/wangxd/LLaVA-Hound-DPO/llava_hound_dpo/self-gen/LLaVA-Hound-SFT_debate_aug_temp_top_p1.0_temp1.2.jsonl
 
 video_dir=/home/user/wangxd/LLaVA-NeXT/data/shareVideoGPTV/dpo_train_data
 image_dir="/"
@@ -31,7 +31,7 @@ rand=$RANDOM
 port=$((19000 + $rand % 1000))
 
 torchrun --nproc_per_node=$n_gpu --master_port=$port dpo_scripts/run_dpo_avg.py \
-    --deepspeed config/zero2.json \
+    --deepspeed config/zero3.json \
     --model_name_or_path $model_name_or_path \
     --loss_type simpo \
     --label_smoothing 0. \
@@ -51,16 +51,16 @@ torchrun --nproc_per_node=$n_gpu --master_port=$port dpo_scripts/run_dpo_avg.py 
     --group_by_modality_length False \
     --bf16 True \
     --output_dir $output_dir \
-    --num_train_epochs 3 \
+    --num_train_epochs 1 \
     --per_device_train_batch_size 1 \
     --per_device_eval_batch_size 1 \
-    --gradient_accumulation_steps 4 \
+    --gradient_accumulation_steps 1 \
     --evaluation_strategy "no" \
     --save_strategy "steps" \
-    --save_steps 1000 \
+    --save_steps 10000 \
     --save_only_model True \
     --save_total_limit 10 \
-    --learning_rate $lr --freeze_mm_mlp_adapter True \
+    --learning_rate $lr --freeze_mm_mlp_adapter False \
     --weight_decay 0. --warmup_ratio 0.1 \
     --lr_scheduler_type "linear" \
     --logging_steps 1 \

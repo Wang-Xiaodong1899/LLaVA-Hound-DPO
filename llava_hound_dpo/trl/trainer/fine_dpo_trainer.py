@@ -918,6 +918,7 @@ class IPOTrainer(Trainer):
             logits = pi_logratios
             losses = -F.logsigmoid(self.beta * logits - constant_gamma)
             # NOTE support label smoothing
+            # print(f"self.label_smoothing: {self.label_smoothing}")
             if self.label_smoothing > 0:
                 # Introduce dynamic here, XXX default 0.5 (remenber)
                 dynamic_weight = self.label_smoothing * torch.where(pi_logratios < 0., torch.tensor(1), torch.tensor(0)) if self.label_smoothing > 0 else 0.0
@@ -1011,15 +1012,15 @@ class IPOTrainer(Trainer):
             padding_value=self.padding_value,
             device=self.accelerator.device,
         )
-        tmp_dtype = torch.float16 if self.args.fp16 else torch.bfloat16
-        model = model.to(self.accelerator.device).to(tmp_dtype)
+        # tmp_dtype = torch.float16 if self.args.fp16 else torch.bfloat16
+        # model = model.to(self.accelerator.device).to(tmp_dtype)
         len_chosen = batch["chosen_labels"].shape[0]
         
-        new_batch = []
-        for item in concatenated_batch["concatenated_images"]:
-            new_batch.append(item.to(tmp_dtype))
-        concatenated_batch.pop("concatenated_images")
-        concatenated_batch["concatenated_images"] = torch.stack(new_batch, dim=0)
+        # new_batch = []
+        # for item in concatenated_batch["concatenated_images"]:
+        #     new_batch.append(item.to(tmp_dtype))
+        # concatenated_batch.pop("concatenated_images")
+        # concatenated_batch["concatenated_images"] = torch.stack(new_batch, dim=0)
 
         all_logits, new_labels = model(
             concatenated_batch["concatenated_input_ids"],
@@ -1033,7 +1034,7 @@ class IPOTrainer(Trainer):
         all_logps = self.get_batch_logps(
             all_logits,
             new_labels,
-            average_log_prob=self.loss_type == "ipo",
+            average_log_prob=self.loss_type in ["ipo", "simpo"],
             is_encoder_decoder=self.is_encoder_decoder,
             label_pad_token_id=self.label_pad_token_id,
         )

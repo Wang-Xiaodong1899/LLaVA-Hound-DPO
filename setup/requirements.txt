@@ -22,4 +22,3 @@ transformers_stream_generator
 tiktoken
 opencv-python
 multiprocess==0.70.16
-flash-attn==2.1.1
