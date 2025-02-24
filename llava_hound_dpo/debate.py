@@ -10,7 +10,7 @@ import torch
 
 
 def run_inference(start=0, end=17000):
-    model_path = "/data2/wangxd/models/LLaVA-Hound-SFT" 
+    model_path = "/volsparse3/wxd/models/vicuna/LLaVA-Hound-SFT" 
     model_name = get_model_name_from_path(model_path)
     tokenizer, model, processor, context_len = load_pretrained_model(model_path, model_base = None, model_name=model_name, cache_dir=None)
     inference_model = ModelInference(model=model, tokenizer=tokenizer, processor=processor, context_len=context_len)
@@ -18,16 +18,18 @@ def run_inference(start=0, end=17000):
 
     output_dir = "self-gen"
     os.system(f"mkdir -p {output_dir}")
+    
+    temperature = 0
 
 
-    output_name = f"LLaVA-Hound-SFT_debate_{start}_{end}"
+    output_name = f"LLaVA-Hound-SFT_debate_{start}_{end}_temp{temperature}"
     answers_file = os.path.join(output_dir, f"{output_name}.jsonl")
     ans_file = open(answers_file, "w")
 
-    video_root = "/home/user/wangxd/LLaVA-NeXT/data/shareVideoGPTV/dpo_train_data"
+    video_root = "/data/llava_hound/shareVideoGPTV/dpo_train_data"
     
     # XXX input
-    jsonl_file = "/home/user/wangxd/LLaVA-NeXT/data/shareVideoGPTV/sft_dpo_17k.jsonl"
+    jsonl_file = "/data/llava_hound/shareVideoGPTV/sft_dpo_17k.jsonl"
     
 
     with open(jsonl_file, 'r', encoding='utf-8') as file:
@@ -80,7 +82,7 @@ You need to reflect the given information as best you can, optimize your respons
                 outputs = inference_model.generate(
                     question=prefix + question,
                     modal_path=video_path, # only take 8 frames
-                    temperature=0, # if temperature < 0.01== do_sample
+                    temperature=temperature, # if temperature < 0.01== do_sample
                     top_p=0.9,
                 )
                 # print(outputs)
