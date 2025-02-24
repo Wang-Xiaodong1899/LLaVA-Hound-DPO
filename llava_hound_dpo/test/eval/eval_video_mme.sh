@@ -18,4 +18,4 @@ python3 test/eval/eval_video_mme.py \
 
 # tip
 # vicuna: llava-hound-dpo
-# export DECORD_EOF_RETRY_MAX=40960 && CUDA_VISIBLE_DEVICES=3 bash test/eval/eval_video_mme.sh /data2/wangxd/models/LLaVA-Hound-SFT LLaVA-Hound-SFT-short 8 short True
+# export DECORD_EOF_RETRY_MAX=40960 && CUDA_VISIBLE_DEVICES=3 bash test/eval/eval_video_mme.sh /volsparse3/wxd/models/vicuna/LLaVA-Hound-SFT LLaVA-Hound-SFT-short 8 short True

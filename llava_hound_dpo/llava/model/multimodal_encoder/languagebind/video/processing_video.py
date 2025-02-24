@@ -273,7 +273,7 @@ class LanguageBindVideoProcessor(ProcessorMixin):
             else:
                 video_decode_backend = self.config.vision_config.video_decode_backend
                 transform_function = self.transform
-            images = make_list_of_images(images) # ['/home/user/wangxd/LLaVA-NeXT/data/shareVideoGPTV/dpo_train_data/--HUaAQKqgA']
+            images = make_list_of_images(images) # ['/data/llava_hound/shareVideoGPTV/dpo_train_data/--HUaAQKqgA']
             
             image_features = [self.image_processor(image, transform_function,
                                                    video_decode_backend=video_decode_backend,

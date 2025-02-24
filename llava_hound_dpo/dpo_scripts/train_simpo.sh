@@ -1,7 +1,7 @@
-input_model_name=${1:-"/data2/wangxd/models/LLaVA-Hound-SFT"}
+input_model_name=${1:-"/volsparse3/wxd/models/vicuna/LLaVA-Hound-SFT"}
 lr=${3:-"5e-7"}
 
-CACHE_DIR=/data2/wangxd/.cache
+CACHE_DIR=/volsparse3/wxd/.cache
 cache_dir=$CACHE_DIR
 export cache_dir=$cache_dir
 
@@ -16,13 +16,13 @@ n_gpu=$(echo $gpu_ids | tr "," "\n" | wc -l)
 echo "Using $n_gpu GPUs: $gpu_ids"
 
 model_name_or_path=$input_model_name
-output_dir=/data2/wangxd/ckpt/${WANDB_PROJECT}/${WANDB_NAME}
+output_dir=/volsparse3/wxd/ckpt/${WANDB_PROJECT}/${WANDB_NAME}
 mkdir -p $output_dir
 
 # DATA original data
 data_path=/home/user/wangxd/LLaVA-NeXT/data/shareVideoGPTV/sft_dpo_17k.jsonl
 
-video_dir=/home/user/wangxd/LLaVA-NeXT/data/shareVideoGPTV/dpo_train_data
+video_dir=/data/llava_hound/shareVideoGPTV/dpo_train_data
 image_dir="/"
 
 # sudo chmod +x -R .
@@ -41,8 +41,8 @@ torchrun --nproc_per_node=$n_gpu --master_port=$port dpo_scripts/run_dpo_avg.py 
     --video_folder $video_dir \
     --image_folder $image_dir \
     --X "Image" "Video" --training_modal 'video' \
-    --image_tower /data2/wangxd/models/LanguageBind/LanguageBind_Image \
-    --video_tower /data2/wangxd/models/LanguageBind/LanguageBind_Video_merge \
+    --image_tower LanguageBind/LanguageBind_Image \
+    --video_tower LanguageBind/LanguageBind_Video_merge \
     --mm_projector_type mlp2x_gelu \
     --mm_vision_select_layer -2 \
     --mm_use_x_start_end False \

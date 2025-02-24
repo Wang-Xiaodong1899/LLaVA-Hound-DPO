@@ -1,5 +1,5 @@
 #!/bin/bash
-ROOT_DIR="/home/user/wangxd/LLaVA-Hound-DPO/llava_hound_dpo"
+ROOT_DIR="/workspace/wxd/LLaVA-Hound-DPO/llava_hound_dpo"
 
 if [ ! -e $ROOT_DIR ]; then
     echo "The root dir does not exist. Exiting the script."

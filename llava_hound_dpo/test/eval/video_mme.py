@@ -5,7 +5,7 @@ import os
 import sys
 import torch
 
-sys.path.append("/home/user/wangxd/LLaVA-Hound-DPO/llava_hound_dpo")
+sys.path.append("/workspace/wxd/LLaVA-Hound-DPO/llava_hound_dpo")
 
 from llava.model.builder import load_pretrained_model
 from llava.mm_utils import get_model_name_from_path
@@ -106,7 +106,7 @@ def parse_args():
     # Define the command-line arguments
     parser.add_argument("--output_dir", help="Directory to save the model results JSON.", required=True)
     parser.add_argument("--output_name", help="Name of the file for storing results JSON.", required=True)
-    parser.add_argument("--model-path", type=str, default="/data2/wangxd/models/LLaVA-Hound-SFT")
+    parser.add_argument("--model-path", type=str, default="/volsparse3/wxd/models/vicuna/LLaVA-Hound-SFT")
     parser.add_argument("--model-base", type=str, default=None)
     parser.add_argument("--conv-mode", type=str, default=None)
  

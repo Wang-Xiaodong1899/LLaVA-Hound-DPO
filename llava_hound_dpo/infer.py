@@ -7,7 +7,7 @@ import os
 video_path = "examples/sample_msrvtt.mp4"
 
 # options ["ShareGPTVideo/LLaVA-Hound-DPO", "ShareGPTVideo/LLaVA-Hound-SFT", "ShareGPTVideo/LLaVA-Hound-SFT-Image_only"]
-model_path = "/data2/wangxd/models/LLaVA-Hound-SFT" 
+model_path = "/volsparse3/wxd/models/vicuna/LLaVA-Hound-SFT" 
 model_name = get_model_name_from_path(model_path)
 tokenizer, model, processor, context_len = load_pretrained_model(model_path, model_base = None, model_name=model_name, cache_dir=None)
 inference_model = ModelInference(model=model, tokenizer=tokenizer, processor=processor, context_len=context_len)
@@ -19,7 +19,7 @@ inference_model = ModelInference(model=model, tokenizer=tokenizer, processor=pro
 # frame_dir, _ = os.path.splitext(video_path)
 # decode2frame(video_path, frame_dir, verbose=True)
 
-frame_dir = "/home/user/wangxd/LLaVA-Hound-DPO/llava_hound_dpo/examples/sample_msrvtt_2"
+frame_dir = "/workspace/wxd/LLaVA-Hound-DPO/llava_hound_dpo/examples/sample_msrvtt_2"
 
 question="What is the evident theme in the video?"
 response = inference_model.generate(

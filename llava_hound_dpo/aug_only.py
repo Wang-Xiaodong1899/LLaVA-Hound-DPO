@@ -10,7 +10,7 @@ import torch
 
 
 def run_inference(start=0, end=17000):
-    model_path = "/data2/wangxd/models/LLaVA-Hound-SFT" 
+    model_path = "/volsparse3/wxd/models/vicuna/LLaVA-Hound-SFT" 
     model_name = get_model_name_from_path(model_path)
     tokenizer, model, processor, context_len = load_pretrained_model(model_path, model_base = None, model_name=model_name, cache_dir=None)
     inference_model = ModelInference(model=model, tokenizer=tokenizer, processor=processor, context_len=context_len)
@@ -26,7 +26,7 @@ def run_inference(start=0, end=17000):
     answers_file = os.path.join(output_dir, f"{output_name}.jsonl")
     ans_file = open(answers_file, "w")
 
-    video_root = "/home/user/wangxd/LLaVA-NeXT/data/shareVideoGPTV/dpo_train_data"
+    video_root = "/data/llava_hound/shareVideoGPTV/dpo_train_data"
     
     # XXX input
     jsonl_file = "/home/user/wangxd/LLaVA-NeXT/data/shareVideoGPTV/sft_dpo_17k.jsonl"

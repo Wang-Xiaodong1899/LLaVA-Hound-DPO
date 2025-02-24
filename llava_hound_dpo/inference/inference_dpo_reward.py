@@ -1,6 +1,6 @@
 import sys
 
-sys.path.append("/home/user/wangxd/LLaVA-Hound-DPO/llava_hound_dpo/")
+sys.path.append("/workspace/wxd/LLaVA-Hound-DPO/llava_hound_dpo/")
 
 import socket
 import json
@@ -272,4 +272,4 @@ def main(model_path, reference_model_path, data_path, video_dir, output_dir, out
 
 if __name__ == "__main__":
     fire.Fire(main)
-    # CUDA_VISIBLE_DEVICES=3 python inference_dpo_reward.py /data2/wangxd/models/LLaVA-Hound-SFT /data2/wangxd/models/LLaVA-Hound-SFT /home/user/wangxd/LLaVA-Hound-DPO/llava_hound_dpo/self-gen/LLaVA-Hound-SFT_debate_aug_temp_top_p1.0_temp1.2.jsonl /home/user/wangxd/LLaVA-NeXT/data/shareVideoGPTV/dpo_train_data debug logp_temp.jsonl 0 1
+    # CUDA_VISIBLE_DEVICES=3 python inference_dpo_reward.py /volsparse3/wxd/models/vicuna/LLaVA-Hound-SFT /volsparse3/wxd/models/vicuna/LLaVA-Hound-SFT /workspace/wxd/LLaVA-Hound-DPO/llava_hound_dpo/self-gen/LLaVA-Hound-SFT_debate_aug_temp_top_p1.0_temp1.2.jsonl /data/llava_hound/shareVideoGPTV/dpo_train_data debug logp_temp.jsonl 0 1
