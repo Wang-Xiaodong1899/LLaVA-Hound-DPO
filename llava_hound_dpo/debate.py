@@ -80,7 +80,7 @@ You need to reflect the given information as best you can, optimize your respons
                 outputs = inference_model.generate(
                     question=prefix + question,
                     modal_path=video_path, # only take 8 frames
-                    temperature=1.0, # if temperature < 0.01== do_sample
+                    temperature=0, # if temperature < 0.01== do_sample
                     top_p=0.9,
                 )
                 # print(outputs)
