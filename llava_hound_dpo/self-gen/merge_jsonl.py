@@ -14,10 +14,10 @@ def merge_jsonl_files(file_list, output_file):
                     
                     outfile.write(line)
 
-file_list = ['LLaVA-Hound-SFT_aug_only_0_4000_top_p1.0_temp1.2.jsonl', 'LLaVA-Hound-SFT_aug_only_4000_8000_top_p1.0_temp1.2.jsonl', 'LLaVA-Hound-SFT_aug_only_8000_12000_top_p1.0_temp1.2.jsonl', 'LLaVA-Hound-SFT_aug_only_12000_17000_top_p1.0_temp1.2.jsonl']
+file_list = ['LLaVA-Hound-SFT_aug_only_0_4000_temp0.jsonl', 'LLaVA-Hound-SFT_aug_only_4000_8000_temp0.jsonl', 'LLaVA-Hound-SFT_aug_only_8000_12000_temp0.jsonl', 'LLaVA-Hound-SFT_aug_only_12000_17000_temp0.jsonl']
 
 
-output_file = 'LLaVA-Hound-SFT_aug_only_17k_top_p1.0_temp1.2.jsonl'
+output_file = 'LLaVA-Hound-SFT_aug_only_17k_temp0.jsonl'
 
 
 merge_jsonl_files(file_list, output_file)
