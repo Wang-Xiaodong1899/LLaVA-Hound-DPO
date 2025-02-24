@@ -7,10 +7,10 @@ export cache_dir=$cache_dir
 
 # export WANDB_MODE=disabled
 export WANDB_PROJECT=llava-hound-sft
-export WANDB_NAME=LLaVA-Hound-SFT-debate-SimPO-17k_top_p1.0_temp1.2-ls0.1
+export WANDB_NAME=LLaVA-Hound-SFT-debate-SimPO-17k_debate-temp0-aug-top_p1.0_temp1.2-ls0.1
 
 # gpu_ids=0
-gpu_ids=4,5,6,7
+gpu_ids=0,1,2,3
 export CUDA_VISIBLE_DEVICES=$gpu_ids
 n_gpu=$(echo $gpu_ids | tr "," "\n" | wc -l)
 echo "Using $n_gpu GPUs: $gpu_ids"
@@ -20,7 +20,7 @@ output_dir=/volsparse3/wxd/ckpt/${WANDB_PROJECT}/${WANDB_NAME}
 mkdir -p $output_dir
 
 # DATA debate data
-data_path=/workspace/wxd/LLaVA-Hound-DPO/llava_hound_dpo/self-gen/LLaVA-Hound-SFT_debate_aug_17k_top_p1.0_temp1.2.jsonl
+data_path=/workspace/wxd/LLaVA-Hound-DPO/llava_hound_dpo/self-gen/LLaVA-Hound-SFT_debate_temp0_aug_17k_top_p1.0_temp1.2.jsonl
 
 video_dir=/data/llava_hound/shareVideoGPTV/dpo_train_data
 image_dir="/"
