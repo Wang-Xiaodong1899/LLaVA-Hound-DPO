@@ -872,7 +872,8 @@ def train(attn_implementation):
         bt_beta=training_args.bt_beta,
         simpo_margin=training_args.simpo_margin,
         dynamic_dpo_alpha=training_args.dynamic_dpo_alpha,
-        label_smoothing=training_args.label_smoothing
+        label_smoothing=training_args.label_smoothing,
+        precompute_ref_log_probs=training_args.precompute_ref_log_probs,
     )
     trainer.save_my_lora_ckpt = save_my_lora_ckpt
     # trainer = LLaVATrainer(model=model,
