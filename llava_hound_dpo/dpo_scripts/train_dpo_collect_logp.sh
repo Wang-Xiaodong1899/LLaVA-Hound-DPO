@@ -11,7 +11,7 @@ export WANDB_PROJECT=llava-hound-sft
 export WANDB_NAME=dpo-collect-logp
 
 # gpu_ids=0
-gpu_ids=0
+gpu_ids=0,1,2,3
 export CUDA_VISIBLE_DEVICES=$gpu_ids
 n_gpu=$(echo $gpu_ids | tr "," "\n" | wc -l)
 echo "Using $n_gpu GPUs: $gpu_ids"
