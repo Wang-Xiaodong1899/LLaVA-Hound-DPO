@@ -819,7 +819,7 @@ def train(attn_implementation):
 
     # TODO debug
     ###################
-    DEBUG = False
+    DEBUG = True
     if DEBUG:
         print("[INFO]----------------Model are Frozen----------------------Attention---------------")
         for p in model.get_model().layers.parameters():
