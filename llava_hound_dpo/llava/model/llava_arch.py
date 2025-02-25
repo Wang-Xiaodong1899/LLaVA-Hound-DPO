@@ -133,6 +133,7 @@ class LlavaMetaForCausalLM(ABC):
 
     def encode_videos(self, videos):
         video_features = self.get_model().get_video_tower()(videos)
+        import pdb; pdb.set_trace()
         video_features = self.get_model().mm_projector(video_features)
         return video_features
 
