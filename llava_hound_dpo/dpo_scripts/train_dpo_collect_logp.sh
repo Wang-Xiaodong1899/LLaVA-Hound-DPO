@@ -70,5 +70,5 @@ torchrun --nproc_per_node=$n_gpu --master_port=$port dpo_scripts/run_dpo_avg.py 
     --gradient_checkpointing True \
     --lazy_preprocess True \
     --cache_dir $cache_dir \
-    --precompute_ref_log_probs True
+    --precompute_ref_log_probs True \
     --report_to wandb 2>&1 | tee $output_dir/train.log
