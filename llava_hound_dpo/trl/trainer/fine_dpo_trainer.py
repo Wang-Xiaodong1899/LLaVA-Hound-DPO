@@ -491,6 +491,12 @@ class IPOTrainer(Trainer):
 
             all_reference_chosen_logps = torch.cat(reference_chosen_logps).float().numpy()
             all_reference_rejected_logps = torch.cat(reference_rejected_logps).float().numpy()
+            
+            import os
+            os.system(f"mkdir -p /volsparse3/wxd/ICCV/data/")
+            
+            np.save("/volsparse3/wxd/ICCV/data/llava_hound_sft_origin_17k_logp_chosen.npy", all_reference_chosen_logps)
+            np.save("/volsparse3/wxd/ICCV/data/llava_hound_sft_origin_17k_logp_rejected.npy", all_reference_rejected_logps)
 
             self.train_dataset = self.train_dataset.add_column(
                 name="reference_chosen_logps", column=all_reference_chosen_logps
