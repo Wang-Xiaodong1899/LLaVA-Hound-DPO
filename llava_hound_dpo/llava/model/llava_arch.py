@@ -136,6 +136,7 @@ class LlavaMetaForCausalLM(ABC):
         device = next(self.get_model().get_video_tower().parameters()).device
         print(f"device: {device}")
         self.get_model().mm_projector.to(device)
+        video_features = video_features.to(torch.bfloat16)
         import pdb; pdb.set_trace()
         video_features = self.get_model().mm_projector(video_features)
         return video_features
