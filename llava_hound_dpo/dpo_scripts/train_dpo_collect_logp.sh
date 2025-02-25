@@ -21,7 +21,7 @@ output_dir=/volsparse3/wxd/ckpt/${WANDB_PROJECT}/${WANDB_NAME}
 mkdir -p $output_dir
 
 # DATA
-data_path=/home/user/wangxd/LLaVA-NeXT/data/shareVideoGPTV/sft_dpo_17k.jsonl
+data_path=/data/llava_hound/shareVideoGPTV/sft_dpo_17k.jsonl
 
 video_dir=/data/llava_hound/shareVideoGPTV/dpo_train_data
 image_dir="/"
