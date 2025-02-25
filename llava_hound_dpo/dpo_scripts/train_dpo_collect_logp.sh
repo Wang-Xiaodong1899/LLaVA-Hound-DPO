@@ -61,7 +61,7 @@ torchrun --nproc_per_node=$n_gpu --master_port=$port dpo_scripts/run_dpo_avg.py 
     --save_steps 1000 \
     --save_only_model True \
     --save_total_limit 10 \
-    --learning_rate $lr --freeze_mm_mlp_adapter True \
+    --learning_rate $lr --freeze_mm_mlp_adapter False \
     --weight_decay 0. --warmup_ratio 0.1 \
     --lr_scheduler_type "linear" \
     --logging_steps 1 \
