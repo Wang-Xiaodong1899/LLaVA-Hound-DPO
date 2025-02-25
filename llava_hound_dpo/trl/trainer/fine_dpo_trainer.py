@@ -359,6 +359,7 @@ class IPOTrainer(Trainer):
         self.max_target_length = max_target_length
         self.tokenizer = tokenizer
         self.precompute_ref_log_probs = precompute_ref_log_probs
+        print(f"precompute_ref_log_probs: {precompute_ref_log_probs}")
 
         # Since ref_logs are precomputed on the first call to get_train/eval_dataloader
         # keep track of first called to avoid computation of future calls
