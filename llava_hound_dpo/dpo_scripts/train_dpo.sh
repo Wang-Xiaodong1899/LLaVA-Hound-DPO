@@ -1,28 +1,26 @@
 input_model_name=${1:-"/volsparse3/wxd/models/vicuna/LLaVA-Hound-SFT"}
-output_model_name=${2:-"/volsparse3/wxd/ckpt/LLaVA-Hound-SFT-DPO-2"}
 lr=${3:-"5e-7"}
 
 CACHE_DIR=/volsparse3/wxd/.cache
-
 cache_dir=$CACHE_DIR
 export cache_dir=$cache_dir
 
 # export WANDB_MODE=disabled
 export WANDB_PROJECT=llava-hound-sft
-export WANDB_NAME=dpo
+export WANDB_NAME=LLaVA-Hound-SFT-DPO
 
 # gpu_ids=0
-gpu_ids=4,5,6,7
+gpu_ids=0,1,2,3
 export CUDA_VISIBLE_DEVICES=$gpu_ids
 n_gpu=$(echo $gpu_ids | tr "," "\n" | wc -l)
 echo "Using $n_gpu GPUs: $gpu_ids"
 
 model_name_or_path=$input_model_name
-output_dir=$output_model_name
+output_dir=/volsparse3/wxd/ckpt/${WANDB_PROJECT}/${WANDB_NAME}
 mkdir -p $output_dir
 
 # DATA
-data_path=/home/user/wangxd/LLaVA-NeXT/data/shareVideoGPTV/sft_dpo_17k.jsonl
+data_path=/data/llava_hound/shareVideoGPTV/sft_dpo_17k.jsonl
 
 video_dir=/data/llava_hound/shareVideoGPTV/dpo_train_data
 image_dir="/"
@@ -51,15 +49,15 @@ torchrun --nproc_per_node=$n_gpu --master_port=$port dpo_scripts/run_dpo.py \
     --group_by_modality_length False \
     --bf16 True \
     --output_dir $output_dir \
-    --num_train_epochs 3 \
-    --per_device_train_batch_size 1 \
+    --num_train_epochs 4 \
+    --per_device_train_batch_size 2 \
     --per_device_eval_batch_size 1 \
-    --gradient_accumulation_steps 4 \
+    --gradient_accumulation_steps 2 \
     --evaluation_strategy "no" \
     --save_strategy "steps" \
-    --save_steps 50 \
+    --save_steps 1000 \
     --save_only_model True \
-    --save_total_limit 11 \
+    --save_total_limit 10 \
     --learning_rate $lr --freeze_mm_mlp_adapter True \
     --weight_decay 0. --warmup_ratio 0.1 \
     --lr_scheduler_type "linear" \
