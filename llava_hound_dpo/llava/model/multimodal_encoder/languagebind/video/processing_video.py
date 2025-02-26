@@ -208,7 +208,7 @@ def load_and_transform_video(
         sampleframes = [frames[i] for i in indices]
         frames = sampleframes
         
-        # frames = sample_frames(frames, num_frames)
+        frames = sample_frames(frames, num_frames)
         # HACK
         # print(len(frames))
         # NOTE original
@@ -216,7 +216,7 @@ def load_and_transform_video(
         # video_data = torch.stack([to_tensor(_) for _ in frames]).permute(1, 0, 2, 3) # (T, C, H, W) -> (C, T, H, W)
         # video_outputs = transform(video_data)
         
-        import pdb; pdb.set_trace()
+        # import pdb; pdb.set_trace()
         
         state = torch.get_rng_state()
         video_outputs = [augmentation(v, transform, state) for v in frames] # [(3, 224, 224)]
