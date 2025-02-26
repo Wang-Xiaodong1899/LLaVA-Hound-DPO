@@ -216,6 +216,8 @@ def load_and_transform_video(
         # video_data = torch.stack([to_tensor(_) for _ in frames]).permute(1, 0, 2, 3) # (T, C, H, W) -> (C, T, H, W)
         # video_outputs = transform(video_data)
         
+        import pdb; pdb.set_trace()
+        
         state = torch.get_rng_state()
         video_outputs = [augmentation(v, transform, state) for v in frames] # [(3, 224, 224)]
         video_outputs = torch.stack(video_outputs, dim=1)
