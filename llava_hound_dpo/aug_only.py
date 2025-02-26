@@ -22,14 +22,14 @@ def run_inference(start=0, end=17000):
     top_p = 1.0
     temperature = 1.2
 
-    output_name = f"LLaVA-Hound-SFT_aug_only_{start}_{end}_top_p{top_p}_temp{temperature}"
+    output_name = f"LLaVA-Hound-SFT_aug_only_f1_{start}_{end}_top_p{top_p}_temp{temperature}"
     answers_file = os.path.join(output_dir, f"{output_name}.jsonl")
     ans_file = open(answers_file, "w")
 
     video_root = "/data/llava_hound/shareVideoGPTV/dpo_train_data"
     
     # XXX input
-    jsonl_file = "/home/user/wangxd/LLaVA-NeXT/data/shareVideoGPTV/sft_dpo_17k.jsonl"
+    jsonl_file = "/data/llava_hound/shareVideoGPTV/sft_dpo_17k.jsonl"
     
 
     with open(jsonl_file, 'r', encoding='utf-8') as file:
