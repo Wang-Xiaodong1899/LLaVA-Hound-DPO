@@ -140,18 +140,18 @@ def get_video_transform(video_decode_backend, num_frames=8):
         )
         
         # # TODO if using augmentation
-        print("--------NOTE: using augmentation!---------------------------------------")
-        transform = transforms.Compose([
-            transforms.RandomResizedCrop(224, scale=(0.08, 0.3)),
-            transforms.RandomApply([
-                transforms.ColorJitter(0.4, 0.4, 0.2, 0.1)  # not strengthened
-            ], p=0.8),
-            transforms.RandomGrayscale(p=0.2),
-            transforms.RandomApply([GaussianBlur([.1, 2.])], p=1.0),
-            transforms.RandomHorizontalFlip(),
-            transforms.ToTensor(),
-            transforms.Normalize(mean=OPENAI_DATASET_MEAN, std=OPENAI_DATASET_STD),
-        ])
+        # print("--------NOTE: using augmentation!---------------------------------------")
+        # transform = transforms.Compose([
+        #     transforms.RandomResizedCrop(224, scale=(0.08, 0.3)),
+        #     transforms.RandomApply([
+        #         transforms.ColorJitter(0.4, 0.4, 0.2, 0.1)  # not strengthened
+        #     ], p=0.8),
+        #     transforms.RandomGrayscale(p=0.2),
+        #     transforms.RandomApply([GaussianBlur([.1, 2.])], p=1.0),
+        #     transforms.RandomHorizontalFlip(),
+        #     transforms.ToTensor(),
+        #     transforms.Normalize(mean=OPENAI_DATASET_MEAN, std=OPENAI_DATASET_STD),
+        # ])
         
         
         
@@ -203,24 +203,24 @@ def load_and_transform_video(
         frames = load_frames(video_path) # many frames
         # import pdb; pdb.set_trace()
         # HACK drop images to 2
-        n = len(frames)
-        indices = np.linspace(0, n - 1, num=1, dtype=int)
-        sampleframes = [frames[i] for i in indices]
-        frames = sampleframes
+        # n = len(frames)
+        # indices = np.linspace(0, n - 1, num=1, dtype=int)
+        # sampleframes = [frames[i] for i in indices]
+        # frames = sampleframes
         
         frames = sample_frames(frames, num_frames)
         # HACK
         # print(len(frames))
         # NOTE original
-        # to_tensor = ToTensor()
-        # video_data = torch.stack([to_tensor(_) for _ in frames]).permute(1, 0, 2, 3) # (T, C, H, W) -> (C, T, H, W)
-        # video_outputs = transform(video_data)
+        to_tensor = ToTensor()
+        video_data = torch.stack([to_tensor(_) for _ in frames]).permute(1, 0, 2, 3) # (T, C, H, W) -> (C, T, H, W)
+        video_outputs = transform(video_data)
         
         # import pdb; pdb.set_trace()
         
-        state = torch.get_rng_state()
-        video_outputs = [augmentation(v, transform, state) for v in frames] # [(3, 224, 224)]
-        video_outputs = torch.stack(video_outputs, dim=1)
+        # state = torch.get_rng_state()
+        # video_outputs = [augmentation(v, transform, state) for v in frames] # [(3, 224, 224)]
+        # video_outputs = torch.stack(video_outputs, dim=1)
         # import pdb; pdb.set_trace()
         
 
