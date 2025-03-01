@@ -7,7 +7,7 @@ export cache_dir=$cache_dir
 
 # export WANDB_MODE=disabled
 export WANDB_PROJECT=llava-hound-sft
-export WANDB_NAME=LLaVA-Hound-SFT-DPO-Ours-debate-temp0-epoch4-CT
+export WANDB_NAME=LLaVA-Hound-SFT-DPO-Ours-debate-top_p1.0_temp1.2
 
 # gpu_ids=0
 gpu_ids=0,1,2,3
@@ -22,6 +22,7 @@ mkdir -p $output_dir
 # DATA debate data
 data_path=/workspace/wxd/LLaVA-Hound-DPO/llava_hound_dpo/self-gen/LLaVA-Hound-SFT_debate_temp0_aug_17k_top_p1.0_temp1.2.jsonl
 # data_path=/workspace/wxd/LLaVA-Hound-DPO/llava_hound_dpo/self-gen/LLaVA-Hound-SFT_debate_temp0_aug_f1_17k_top_p1.0_temp1.2.jsonl
+data_path=/workspace/wxd/LLaVA-Hound-DPO/llava_hound_dpo/self-gen/LLaVA-Hound-SFT_debate_aug_17k_top_p1.0_temp1.2.jsonl
 
 video_dir=/data/llava_hound/shareVideoGPTV/dpo_train_data
 image_dir="/"
