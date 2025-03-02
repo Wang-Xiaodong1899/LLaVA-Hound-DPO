@@ -1,13 +1,13 @@
-input_model_name=${1:-"/volsparse3/wxd/models/vicuna/LLaVA-Hound-SFT"}
-lr=${3:-"5e-7"}
+input_model_name=${1:-"/volsparse3/wxd/ckpt/llava-hound-sft/LLaVA-Hound-SFT-DPO-Ours-debate-temp0-epoch4/checkpoint-4000"}
+lr=${3:-"3.1e-8"}
 
 CACHE_DIR=/volsparse3/wxd/.cache
 cache_dir=$CACHE_DIR
 export cache_dir=$cache_dir
 
 # export WANDB_MODE=disabled
-export WANDB_PROJECT=llava-hound-sft
-export WANDB_NAME=LLaVA-Hound-SFT-DPO-Ours-debate-top_p1.0_temp1.2
+export WANDB_PROJECT=llava-hound-sft-jf
+export WANDB_NAME=LLaVA-Hound-SFT-DPO-Ours-0302-temp0_aug_f1
 
 # gpu_ids=0
 gpu_ids=0,1,2,3
@@ -20,9 +20,10 @@ output_dir=/volsparse3/wxd/ckpt/${WANDB_PROJECT}/${WANDB_NAME}
 mkdir -p $output_dir
 
 # DATA debate data
-data_path=/workspace/wxd/LLaVA-Hound-DPO/llava_hound_dpo/self-gen/LLaVA-Hound-SFT_debate_temp0_aug_17k_top_p1.0_temp1.2.jsonl
+# data_path=/workspace/wxd/LLaVA-Hound-DPO/llava_hound_dpo/self-gen/LLaVA-Hound-SFT_debate_temp0_aug_17k_top_p1.0_temp1.2.jsonl
 # data_path=/workspace/wxd/LLaVA-Hound-DPO/llava_hound_dpo/self-gen/LLaVA-Hound-SFT_debate_temp0_aug_f1_17k_top_p1.0_temp1.2.jsonl
-data_path=/workspace/wxd/LLaVA-Hound-DPO/llava_hound_dpo/self-gen/LLaVA-Hound-SFT_debate_aug_17k_top_p1.0_temp1.2.jsonl
+# data_path=/workspace/wxd/LLaVA-Hound-DPO/llava_hound_dpo/self-gen/LLaVA-Hound-SFT_debate_aug_17k_top_p1.0_temp1.2.jsonl
+data_path=/volsparse3/wxd/data/LLaVA-Hound-SFT_debate_temp0_aug_f1_top_p1.0_temp1.2_17k_0302.jsonl
 
 video_dir=/data/llava_hound/shareVideoGPTV/dpo_train_data
 image_dir="/"
